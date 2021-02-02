@@ -1,17 +1,248 @@
 ---
 layout: post
-title: Flake it till you make it
-subtitle: Excerpt from Soulshaping by Jeff Brown
+title: DS1 Project
+subtitle: -----
 cover-img: /assets/img/path.jpg
 thumbnail-img: /assets/img/thumb.png
 share-img: /assets/img/path.jpg
-tags: [books, test]
+tags: [age groups, population]
 ---
 
-Under what circumstances should we step off a path? When is it essential that we finish what we start? If I bought a bag of peanuts and had an allergic reaction, no one would fault me if I threw it out. If I ended a relationship with a woman who hit me, no one would say that I had a commitment problem. But if I walk away from a seemingly secure route because my soul has other ideas, I am a flake?
+Introduction
 
-The truth is that no one else can definitively know the path we are here to walk. It’s tempting to listen—many of us long for the omnipotent other—but unless they are genuine psychic intuitives, they can’t know. All others can know is their own truth, and if they’ve actually done the work to excavate it, they will have the good sense to know that they cannot genuinely know anyone else’s. Only soul knows the path it is here to walk. Since you are the only one living in your temple, only you can know its scriptures and interpretive structure.
+This is my first experience of playing with a dataset, determining statistical hypotheses, drawing conclusions, and presenting results.  
+The dataset is “World Population by Age Group 2020”, which involves the world population divided into age groups and sexes, i.e., male&female, by location in 2020.
+It is not necessarily a preferred topic, but it is simple and straightforward for the task at issue, for which what is done with the data is more important than the aboutness of the data.
+ 
+The dataset has five variables, i.e., Location, AgeGrp, PopMale, PopFemale, PopTotal. I found it in kaggle (https://www.kaggle.com/alizahidraja/world-population-by-age-group-2020). It was created in preparation for COVID-19 related research and predictions. It is stated to be extracted from UN data of World Population Prospects 2019; so it is based on projections (https://population.un.org/wpp/Download/Standard/CSV/).
 
-At the heart of the struggle are two very different ideas of success—survival-driven and soul-driven. For survivalists, success is security, pragmatism, power over others. Success is the absence of material suffering, the nourishing of the soul be damned. It is an odd and ironic thing that most of the material power in our world often resides in the hands of younger souls. Still working in the egoic and material realms, they love the sensations of power and focus most of their energy on accumulation. Older souls tend not to be as materially driven. They have already played the worldly game in previous lives and they search for more subtle shades of meaning in this one—authentication rather than accumulation. They are often ignored by the culture at large, although they really are the truest warriors.
+The dataset was not proper for the desired analyses, for two main reasons. First, for each location, there are four rows - one per age group. Second, the dataset not only contains countries but also regions, continents, economic and other forms of international groups; so, the population data contains several iterations of, for example, China’s population, which skews the world population significantly. Plus, populations are not precise in the data, i.e., they are rounded to the thousandth place, but this would not have a significant effect on the analyses. Moreover, although it is not necessarily a limitation, the foundational quantitative values are populations only - either the world population or a subset of it. There are no other distinct quantitative dimensions.
 
-A soulful notion of success rests on the actualization of our innate image. Success is simply the completion of a soul step, however unsightly it may be. We have finished what we started when the lesson is learned. What a fear-based culture calls a wonderful opportunity may be fruitless and misguided for the soul. Staying in a passionless relationship may satisfy our need for comfort, but it may stifle the soul. Becoming a famous lawyer is only worthwhile if the soul demands it. It is an essential failure if you are called to be a monastic this time around. If you need to explore and abandon ten careers in order to stretch your soul toward its innate image, then so be it. Flake it till you make it.
+Statistical methods
+Describe your hypotheses.
+
+If we are to artificially assert hypotheses, they would be variations of the statement that population distributions (of the relevant groups) are equally distributed - or that there is a normal distribution. One form of hypothesis would be that sexes are equally distributed in each country - and, by extension, that sexes, i.e., male/female, are equally distributed worldwide. If true, then the male and the female populations would be equal - in any given country and worldwide. Another form of hypothesis would be that the population is equally distributed into age groups in each country - and, by extension, that the world population is equally distributed into age groups. If true, then, in the relevant domain, (0-19 population/4) = (20-39 population/4) = (40-59 population/4) = (60+ population/4). Plus, a hybrid form of  hypothesis would be that sexes are equally distributed (local or worldwide) per age group.
+
+Describe any data wrangling or feature engineering you had to do.
+
+I dropped all regions, continents and economic groups in order to only have countries as locations; I did this manually because they did not have any marker with which to differentiate them from countries. (I did it with a single line of code, but had to find and write down each location to be dropped.) I took four broad routes.
+
+First, I focused on population by location and sex - without age groups. For this, I dropped the age group variable. I grouped the data by location and aggregate quantities along the relevant columns, i.e., male population, female population, total population. Next, I created several columns; PopMale % and PopFemale % for male and female percentages within the domain represented by the row, i.e., country. PopMale %% and PopFemale %% for global, i.e. worldwide, percentages of such a domain’s male and female populations; AgeGrp % for the percentage of each age group’s population among the total, i.e., four age groups’, population; PopMale/Female for the ratio of male to female population per the relevant domain.
+
+Second, I took into consideration all available information, i.e., population by location, age groups, and sex. For simplicity, I created four sub-databases, one for each age group. For each sub-database, I re-created the same columns previously discussed, but also added Majority, which is a categorical variable that could take either ‘M’ or ‘F’.
+
+Third, I could focus on worldwide population by age groups and sex, for which I dropped the location variable. I grouped the data by age group and aggregate quantities along the relevant columns, i.e., male population, female population, total population. I re-created the same columns previously discussed. I also created a mini database with indices ‘M’ and ‘F’ with four variables, one per age group.
+
+Fourth, I created a new database consisting of countries and their sub-populations per age group, which I gathered from previously generated databases. I used this new database to find each country’s population distribution per age group.
+
+Provide a description of the statistical methods you used to analyze your data.
+
+    Percentages
+    Distributions
+
+Results
+
+Describe the results of your analyses.
+
+Distribution of sexes per country:
+
+The number of countries in which the male population is the majority is 124; the number of countries in which the female population is the majority is 77. Belize, Grenada and Malta have equal distribution; though, since the populations are rounded to the thousandth place, it is highly unlikely they are actually equal. 
+
+Top 5 countries in which the M/F ratio is the highest, i.e., countries in which the male population is highest:
+Qatar                   		3.050919
+United Arab Emirates    	  2.241708
+Oman                   		  1.947246
+Bahrain                 		1.847716
+Maldives                		1.757895
+
+Top 5 countries in which the M/F ratio is the lowest, i.e., countries in which the female population is highest:
+Curaçao               		  0.795181
+Nepal                   		0.845194
+China, Hong Kong SAR	      0.847332
+Latvia                  		0.852036
+Martinique              		0.853403
+
+Distribution of age groups per country
+
+Top 5 countries in which the population of age group 0-19 is the highest:
+Niger				          60.60%
+Mali				          58.16%
+Chad				          57.83%
+Somalia			          57.63%
+Uganda				        57.52%
+
+Top 5 countries in which the population of age group 20-39 is the highest:
+Qatar				          54.50%
+United Arab Emirates  53.83%
+Maldives			        52.30%
+Oman				          49.59%
+Bahrain			          48.19%
+
+Top 5 countries in which the population of age group 40-59 is the highest:
+Kuwait				        35.83%
+Singapore         		32.67%
+Republic of Korea     32.57%
+Spain         			  32.06%
+Aruba         			  31.82%
+
+Top 5 countries in which the population of age group 60+ is the highest:
+Japan				          34.32%
+Italy       			    29.84%
+Portugal       			  29.34%
+Finland       			  28.98%
+Greece       			    28.75%
+
+Ratio of M/F per age groups and country
+
+Top 5 countries in which M/F ratio is highest among the population of age group 0-19:
+Kuwait				              1.171756
+Seychelles			            1.166667
+Micronesia (Fed. States of) 1.150000
+China				                1.147649
+Azerbaijan  			          1.144279
+
+Top 5 countries in which M/F ratio is lowest among the population of age group 0-19:
+Curaçao			                1.00000
+Channel Islands		          1.00000
+Saint Lucia			            1.00000
+Namibia			                0.99661
+Peru				                0.99115
+
+Top 5 countries in which M/F ratio is highest among the population of age group 20-39:
+Qatar 				              4.168874
+Oman 				                2.802413
+Maldives			              2.653333
+United Arab Emirates        2.644719
+Bahrain			                2.480687
+
+Top 5 countries in which M/F ratio is lowest among the population of age group 20-39:
+Curaçao			                1.00000
+Channel Islands	            1.00000
+Saint Lucia			            1.00000
+Namibia			                0.99661
+Peru 				                0.99115
+
+Top 5 countries in which M/F ratio is highest among the population of age group 40-59:
+Qatar				                3.785235
+United Arab Emirates 	      2.996672
+Oman 				                2.429553
+Bahrain			                1.932836
+Saudi Arabia			          1.929354
+
+Top 5 countries in which M/F ratio is lowest among the population of age group 40-59:
+Nepal 				              0.749182
+El Salvador			            0.748982
+China, Hong Kong SAR 	      0.747566
+Guinea				              0.708947
+Curaçao			                0.708333
+
+Top 5 countries in which M/F ratio is highest among the population of age group 60+:
+Qatar				                3.800000
+United Arab Emirates	      2.753086
+Kuwait				              1.924731
+Bahrain			                1.441176
+Saudi Arabia			          1.375439
+
+Top 5 countries in which M/F ratio is lowest among the population of age group 60+:
+Russian Federation		      0.557890
+Belarus				              0.557833
+Ukraine			                0.556745
+Latvia				              0.548485
+Kiribati				            0.500000
+
+# of countries in which the male population of age 0-19 are the majority: 202
+# of countries in which the female population of age 0-19 are the majority: 2
+
+# of countries in which the male population of age 20-39 are the majority: 149
+# of countries in which the female population of age 20-39 are the majority: 55
+
+# of countries in which the male population of age 40-59 are the majority: 76
+# of countries in which the female population of age 40-59 are the majority: 128
+
+# of countries in which the male population above age 60 are the majority: 23
+# of countries in which the female population above age 60 are the majority: 181
+
+Worldwide population distribution of age groups:
+0-19     	33.24%
+20-39    	30.02%
+40-59    	23.20%
+60+      	13.54%
+
+Worldwide population (and ratio) of sexes:
+M		      3967138.0
+F		      3902614.0
+M/F       1.016
+
+Worldwide male population per age group:
+0-19     	34.05%
+20-39    	30.51%
+40-59    	23.06%
+60+      	12.38%
+
+Worldwide female population per age group:
+0-19     	32.42%
+20-39    	29.53%
+40-59    	23.34%
+60+      	14.71%
+
+Worldwide age groups’ M/F percentages:
+0-19		51.64%		48.36%
+20-39		51.22%		48.78%
+40-59		50.11%		49.89%
+60+		  46.11%		53.89%
+
+Worldwide M/F population ratio per age group:
+0-19     	1.067714
+20-39    	1.050151
+40-59    	1.004322
+60+      	0.855657
+
+Present two visualizations related to your hypotheses.
+
+      Plots
+      Create a data frame with M/F and the four groups
+      2 plots, one barplot for M/F general
+      4 bar plots for each age group
+
+      Pie-charts 
+      “% of males per age group”
+      “% of females per age group”
+      “% per age group”
+
+Conclusion
+
+All the hypotheses are rejected.
+
+The hypotheses that the male and the female populations would be equal in any given country and worldwide are rejected. The hypothesis that sexes are equally distributed in each country is rejected because with the exception of three countries, i.e., Belize, Grenada and Malta, no country has an equal distribution. Since the populations are not precise in the data and that they are rounded to the thousandth place, it is highly unlikely they are actually equal. The hypothesis that sexes are equally distributed worldwide is rejected because, although the M/F ratio is 1.0165, the difference is arguably not insignificant relative to the total world population.
+
+The hypotheses that the population is equally distributed into age groups in each country and worldwide are rejected. The hypothesis that the population is equally distributed into age groups in each country is rejected because there is no country with that property. The hypothesis that the world population is equally distributed into age groups is rejected because it is not.
+
+The hypotheses that sexes are equally distributed per age group in each country and worldwide are rejected. The hypothesis that sexes are equally distributed per age group in each country is rejected because there is no country with that property. The hypothesis that sexes are equally distributed per age group worldwide is rejected because they are not.
+
+Summarize the key features of your visualizations.
+
+      Plots because...
+      Barplots because...
+
+      Pie Chart because it adds up to 100% and not many variables.
+
+
+The data is based on projections, so, despite arguably its values do not statistically significantly differ from the actual values, i.e., the actual world population in 2020, they still are not precisely the same. Even if we assume that they are, for our intents and purposes, correct, they nevertheless concern the population in 2020;  it is now 2021. Moreover, there are 204 countries in the dataset, whereas different sources state different numbers; for example, a google search states that there are 195 countries and worldometer.com states that there are 235 countries. Though, the population total in the dataset is around 7.8 billion so there is no serious difference with respect to the worldwide population. Lastly, the binary male/female categorization could be objected to as an oversimplification and either ignoring or misrepresenting certain groups.
+
+
+Compare your results to other, similar analyses.
+Discuss new questions your results raise or new directions for further research.
+
+
+What are the reasons behind the non-equal distributions?
+
+Why do some countries have certain abnormal differences in age groups?
+
+Why do some countries have certain abnormal differences in sexes?
+	Qatar, the Middle east...
+
+Population of the worldwide age group 60+ is less than others due to old age and death, but why worldwide male population is more in age groups 60- but considerably less in 60+?
+
+
+
+
