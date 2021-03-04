@@ -1,0 +1,172 @@
+---
+layout: post
+title: Predicting H1B Visa Applications (2011-2016)
+subtitle: -----
+cover-img: /assets/img/path.jpg
+thumbnail-img: /assets/img/thumb.png
+share-img: /assets/img/path.jpg
+tags: [H1B, visa]
+---
+
+# Introduction
+
+The dataset contains information on H1B Visa applications between 2011-2016; it is from Kaggle. (https://www.kaggle.com/nsharan/h-1b-visa)
+
+The original dataset has 3 million rows, so I got a sample of 500000 rows.
+
+The data, i.e., the column that is to be the target, is imbalanced; over 80% of it is “CERTIFIED”, so it is questionable whether accuracy is the best arbiter.
+
+
+# Data Wrangling
+
+The changes I made in the dataset could be categorized, based on their importances, into three kinds: global structural changes, making the target column binary and reducing the high cardinality of relevant columns.
+
+First, global structural changes include dropping irrelevant columns, e.g., latitude, longitude, converting unfitting data types, making the “YEAR” column the index, and handling missing values.
+
+Second, making the target column, i.e., “CASE_STATUS”, binary involved recategorizing the six classes, i.e., “CERTIFIED”, “CERTIFIED-WITHDRAWN”, ‘DENIED”, “WITHDRAWN”, ‘PENDING QUALITY AND COMPLIANCE REVIEW - UNASSIGNED” and “REJECTED”; the latter is an outlier, if anything is. I categorized them into “CERTIFIED” and “DENIED, WITHDRAWN OR PENDING”. 
+
+The semantically tricky part was deciding what to do with “CERTIFIED-WITHDRAWN”; I decided to recategorize it into “DENIED, WITHDRAWN OR PENDING”; my reasoning was that I took certification not only as a legal product but as involving the actual performance the certification is meant to make possible.
+
+Third, which was the most cumbersome part, reducing high cardinality columns involved four columns, i.e., “WORKSITE”, “SOC_NAME”, “EMPLOYER_NAME” and “JOB_TITLE”.
+
+“WORKSITE” contained information at the city level and 9735 unique values; I turned all to states and had 52 values.
+
+“SOC_NAME” contained approximately 1423 unique values; there were many duplicates with upper and lower cases. I created over 21 areas/industries and cataloged the majority of the values into them; the remaining few hundred unique values are clustered into the category “Other” to have 22 unique values overall.
+
+“EMPLOYER_NAME” name contained over 88754 unique values. I kept the top 50 employers that take up a significant portion of the applications and clustered the rest into a new sub-category “Other” to have 51 unique values overall.
+
+“JOB_TITLE” contained over 84809 unique values. I created 31 features that mostly reduced specific kinds to their more general properties; for example, financial analysts and technical analysts are both grouped as “analysts”. I kept the top 100 job titles and clustered the rest into a new sub-category “Other” to have 101 unique values overall.
+
+
+# Statistical Information and Visualizations
+
+Increase in applications and certification over years.
+
+<img src = "/assets/h1b/applicants_over_years.png">
+
+Rate of certification was more or less constant.
+
+<img src = "/assets/h1b/percentagecertifiedyears.png">
+
+Most applications were certified.
+
+<img src = "/assets/h1b/percentagecertified.png">
+
+Most applicants earn between 50-75K, then comes 75-100K, 25-50K and 100-150K groups.
+
+<img src = "/assets/h1b/#applicantswagegroups.png">
+
+Although there aren’t many, significantly, almost all applicants earning under 15K are denied, withdrawn or pending, while almost all applicants earning over 1 million dollars are certified. Most interestingly, over 80% of applicants who earn between 500K and 1 million dollar are denied, withdrawn or pending.
+
+<img src = "/assets/h1b/%applicantswagegroups.png.png">
+
+Technology/Computer applicants are the overwhelming majority; significantly after them comes business, medical/health, education and sciences.
+
+<img src = "/assets/h1b/#applicantsocctype.png">
+
+<img src = "/assets/h1b/%applicantsocctype.png">
+
+Likewise, the majority of the top employers are technology/computer companies. Four out of top five employers are Indian companies.
+
+<img src = "/assets/h1b/topemployers.png">
+
+Majority of the applicants are analysts and engineers.
+
+<img src = "/assets/h1b/topjobtitles.png">
+
+California has the most applicants, trailing Texas and New York; non-surprisingly, most top work sites are coastal states.
+
+<img src = "/assets/h1b/topworksite.png">
+
+# Split Data & Baseline Accuracy
+
+The training set contains information on applications between 2011-2014.
+The validation set contains only the 2015 applications.
+The testing set involves the 2016 applications.
+
+Baseline Accuracy: 0.8640889519099414
+
+# Models
+
+I utilized a linear, i.e. logistic, model and three tree-based models, i.e., Random Forest, Gradient Boost and XGBoost. All model types have very close accuracy scores; especially the logistic model, the gradient boosting model and XGBoost model have extremely close scores. XGBoost has the best score with a miniscule difference. RandomizedSearchCV and GridSearch only produced better results for Random Forest Classifier; for others, the best were the standard models with default parameters.
+
+Logistic model
+
+    Training Accuracy: 0.8649362776461637
+    Validation Accuracy: 0.8850114861970954
+
+Random Forest Classifier
+
+    Training Accuracy: 0.9239654844455204
+    Validation Accuracy: 0.851049332243118
+    Score after RandomizedSearchCV: 0.8652509982479256
+
+Gradient Boosting Classifier
+
+    Training Accuracy: 0.8652682909958671
+    Validation Accuracy: 0.8851185609157809
+    
+XGBoost Classifier
+
+    Training Accuracy: 0.8653167096093656
+    Validation Accuracy: 0.885157497177121
+
+While Gradient Boosting Classifier and XGBoost Classifier found "EMPLOYER_NAME" as the most important feature, Random Forest Classifier found "PREVAILING_WAGE" as being the most important by a significant margin; though, XGBoost did find "PREVAILING_WAGE" at the top of the permutation importance list - by a significant margin.
+
+In the end, the best accuracy result is not much of an improvement over the baseline accuracy score; presumably, this is due to the data being imbalanced.
+
+
+# Other Evaluation Metrics
+
+##  Confusion Matrices
+
+I took the logistic model as the linear model and the XGBoost model as the best tree-based model. Both had abysmally low recall scores that are close to null. XGBoost model’s precision is significantly better than the logistic model’s score.
+
+<img src = "/assets/h1b/confusionmlogistic.png">
+
+<img src = "/assets/h1b/classificationreportlogistic.png">
+
+<img src = "/assets/h1b/confusionmXGB.png">
+
+<img src = "/assets/h1b/classificationreportXGB.png">
+
+
+##  ROC_AUC Scores
+
+The score of the logistic model is slightly better than XGBoost model’s score. While the gradient boosting model’s score is lower, it is not as significant as the drop in the Random Forest model’s score.
+
+    logistic regression model roc auc score for val is 0.6396721719967905
+    logistic regression model roc auc score for test is 0.6291471667564915
+
+    random forest model roc auc score for val is 0.5764642900191314
+    random forest model roc auc score for test is 0.5216913665077221
+
+    gradient boost model roc auc score for val is 0.6250546613098583
+    gradient boost model roc auc score for test is 0.5978803323118995
+
+    XGBoost model roc auc score for val is 0.6370743060103758
+    XGBoost model roc auc score for test is 0.616272464340416
+
+<img src = "/assets/h1b/ROC_AUC_H1B.png">
+
+
+# Conclusion
+
+XGBoost Classifier appears to be the relatively best option; if only the logistic model didn't have noticeably low recall score, it could have been a contender as well. Unfortunately, it seems the data does not permit anything more interesting from a predictive modelling perspective. 
+
+However, it has been instructive in other manners, the most important is having to take into consideration several evaluation metrics due to the potential inefficiency of the standard accuracy scores.
+
+Moreover, concerning the contents at issue, i.e., H1B Visa applications, the results at hand either informs or confirms certain valuable information.
+
+H1B Visa is a reliable way for foreigners who wish to work in the U.S and that, barring anomalies, someone who works for a company that is willing to keep him/her in the country and earns above 25K could expect to have his/her application certified.
+
+An overwhelming majority of the applicants and thus certified applications come from technology/computer occupations. More generally, that the overwhelming majority of the applicants and thus certified applications come from STEM fields.
+
+While it is understandable that certification rate is lowest for those earning under 15K, the most interesting information is that the same rate is almost as low for those earning between 500K and 1 million; what makes it more interesting is that the rate at issue is close to null for those earning over 1 million.
+
+
+
+
+
+
+
